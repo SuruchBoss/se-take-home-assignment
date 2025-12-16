@@ -2,6 +2,7 @@ import 'package:feedmetest/features/cart/controller/cart_cubit.dart';
 import 'package:feedmetest/features/cart/controller/cart_state.dart';
 import 'package:feedmetest/features/kitchen/controller/kitchen_cubit.dart';
 import 'package:feedmetest/features/kitchen/controller/kitchen_state.dart';
+import 'package:feedmetest/features/kitchen/model/order.dart';
 import 'package:feedmetest/features/kitchen/presentation/kitchen_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -87,23 +88,28 @@ class MenuView extends StatelessWidget {
       persistentFooterButtons: [
         BlocBuilder<KitchenCubit, KitchenState>(
           builder: (context, state) {
-            if (state is KitchenOrdersUpdated && state.orders.isNotEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Current Order: #${state.orders.first.id}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Total Orders: ${state.orders.length}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              );
+            if (state is KitchenOrdersUpdated) {
+              final pendingOrders = state.orders
+                  .where((order) => order.status != OrderStatus.completed)
+                  .toList();
+              if (pendingOrders.isNotEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Current Order: #${pendingOrders.first.id}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'Total Orders: ${pendingOrders.length}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                );
+              }
             }
             return const SizedBox.shrink();
           },

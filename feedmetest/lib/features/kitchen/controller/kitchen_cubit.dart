@@ -15,6 +15,7 @@ class KitchenCubit extends Cubit<KitchenState> {
       items: List.from(items),
       isVip: isVip,
       timestamp: DateTime.now(),
+      status: OrderStatus.pending,
     );
 
     _orders.add(newOrder);
@@ -31,8 +32,21 @@ class KitchenCubit extends Cubit<KitchenState> {
     emit(KitchenOrdersUpdated(List.from(_orders)));
   }
 
+  void processOrder(String orderId) {
+    final orderIndex = _orders.indexWhere((order) => order.id == orderId);
+    if (orderIndex != -1) {
+      final order = _orders[orderIndex];
+      _orders[orderIndex] = order.copyWith(status: OrderStatus.processing);
+      emit(KitchenOrdersUpdated(List.from(_orders)));
+    }
+  }
+
   void completeOrder(String orderId) {
-    _orders.removeWhere((order) => order.id == orderId);
-    emit(KitchenOrdersUpdated(List.from(_orders)));
+    final orderIndex = _orders.indexWhere((order) => order.id == orderId);
+    if (orderIndex != -1) {
+      final order = _orders[orderIndex];
+      _orders[orderIndex] = order.copyWith(status: OrderStatus.completed);
+      emit(KitchenOrdersUpdated(List.from(_orders)));
+    }
   }
 }
