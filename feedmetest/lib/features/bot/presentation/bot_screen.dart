@@ -24,41 +24,68 @@ class BotView extends StatefulWidget {
 }
 
 class _BotViewState extends State<BotView> {
+  late int _pendingBotCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _pendingBotCount = context.read<BotCubit>().state.numberOfBots;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<BotCubit, BotState>(
-      builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: () {
-                  if (state.numberOfBots > 1) {
-                    context
-                        .read<BotCubit>()
-                        .setNumberOfBots(state.numberOfBots - 1);
-                  }
-                },
-              ),
-              Text(
-                '${state.numberOfBots}',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  context
-                      .read<BotCubit>()
-                      .setNumberOfBots(state.numberOfBots + 1);
-                },
-              ),
-            ],
-          ),
-        );
+    return BlocListener<BotCubit, BotState>(
+      listener: (context, state) {
+        setState(() {
+          _pendingBotCount = state.numberOfBots;
+        });
       },
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed: () {
+                    if (_pendingBotCount > 1) {
+                      setState(() {
+                        _pendingBotCount--;
+                      });
+                    }
+                  },
+                ),
+                Text(
+                  '$_pendingBotCount',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    setState(() {
+                      _pendingBotCount++;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                context.read<BotCubit>().setNumberOfBots(_pendingBotCount);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Number of bots updated.'),
+                  ),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
