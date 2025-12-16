@@ -25,20 +25,20 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  void removeFromCart(CartItem cartItem) {
+  void removeFromCart(MenuItem menuItem) {
     if (state is CartLoaded) {
       final currentState = state as CartLoaded;
       final List<CartItem> updatedCart = List.from(currentState.cartItems)
-        ..remove(cartItem);
+        ..removeWhere((item) => item.menuItem.id == menuItem.id);
       emit(CartLoaded(updatedCart));
     }
   }
 
-  void incrementQuantity(CartItem cartItem) {
+  void incrementQuantity(MenuItem menuItem) {
     if (state is CartLoaded) {
       final currentState = state as CartLoaded;
       final List<CartItem> updatedCart = List.from(currentState.cartItems);
-      final index = updatedCart.indexWhere((item) => item.menuItem.id == cartItem.menuItem.id);
+      final index = updatedCart.indexWhere((item) => item.menuItem.id == menuItem.id);
       if (index != -1) {
         final existingItem = updatedCart[index];
         updatedCart[index] = existingItem.copyWith(quantity: existingItem.quantity + 1);
@@ -47,11 +47,11 @@ class CartCubit extends Cubit<CartState> {
     }
   }
 
-  void decrementQuantity(CartItem cartItem) {
+  void decrementQuantity(MenuItem menuItem) {
     if (state is CartLoaded) {
       final currentState = state as CartLoaded;
       final List<CartItem> updatedCart = List.from(currentState.cartItems);
-      final index = updatedCart.indexWhere((item) => item.menuItem.id == cartItem.menuItem.id);
+      final index = updatedCart.indexWhere((item) => item.menuItem.id == menuItem.id);
       if (index != -1) {
         final existingItem = updatedCart[index];
         if (existingItem.quantity > 1) {
@@ -59,7 +59,7 @@ class CartCubit extends Cubit<CartState> {
           emit(CartLoaded(updatedCart));
         } else {
           // If quantity is 1, remove the item
-          removeFromCart(cartItem);
+          removeFromCart(menuItem);
         }
       }
     }

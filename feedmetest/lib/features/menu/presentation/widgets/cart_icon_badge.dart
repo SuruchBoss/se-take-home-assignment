@@ -17,7 +17,12 @@ class CartIconBadge extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.shopping_cart),
+                icon: Icon(
+                  Icons.shopping_cart,
+                  color: state is CartLoaded && state.cartItems.isNotEmpty
+                      ? Colors.blue
+                      : null,
+                ),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(

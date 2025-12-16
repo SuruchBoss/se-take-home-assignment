@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MenuItemCard extends StatelessWidget {
-  const MenuItemCard({super.key, required this.item});
+  const MenuItemCard({super.key, required this.item, required this.quantity});
 
   final MenuItem item;
+  final int quantity;
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +38,31 @@ class MenuItemCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                context.read<CartCubit>().addToCart(item);
-              },
-              child: const Text('Add to Cart'),
-            ),
+            child: quantity == 0
+                ? ElevatedButton(
+                    onPressed: () {
+                      context.read<CartCubit>().addToCart(item);
+                    },
+                    child: const Text('Add to Cart'),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () {
+                          context.read<CartCubit>().decrementQuantity(item);
+                        },
+                      ),
+                      Text('$quantity'),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () {
+                          context.read<CartCubit>().incrementQuantity(item);
+                        },
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),

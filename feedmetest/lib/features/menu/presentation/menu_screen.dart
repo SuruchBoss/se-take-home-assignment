@@ -1,3 +1,5 @@
+import 'package:feedmetest/features/cart/controller/cart_cubit.dart';
+import 'package:feedmetest/features/cart/controller/cart_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../controller/menu_cubit.dart';
@@ -29,28 +31,37 @@ class MenuView extends StatelessWidget {
         actions: [const CartIconBadge()],
       ),
       body: BlocBuilder<MenuCubit, MenuState>(
-        builder: (context, state) {
-          if (state is MenuLoading || state is MenuInitial) {
+        builder: (context, menuState) {
+          if (menuState is MenuLoading || menuState is MenuInitial) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (state is MenuLoaded) {
-            return GridView.builder(
-              padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: state.menuItems.length,
-              itemBuilder: (context, index) {
-                final item = state.menuItems[index];
-                return MenuItemCard(item: item);
-              },
-            );
+          if (menuState is MenuLoaded) {
+            return BlocBuilder<CartCubit, CartState>(
+                builder: (context, cartState) {
+              if (cartState is CartLoaded) {
+                return GridView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: menuState.menuItems.length,
+                  itemBuilder: (context, index) {
+                    final item = menuState.menuItems[index];
+                    final cartItem = cartState.cartItems.where((cartItem) => cartItem.menuItem.id == item.id);
+                    final quantity = cartItem.isEmpty ? 0 : cartItem.first.quantity;
+
+                    return MenuItemCard(item: item, quantity: quantity);
+                  },
+                );
+              }
+              return const Center(child: CircularProgressIndicator());
+            });
           }
-          if (state is MenuError) {
-            return Center(child: Text(state.message));
+          if (menuState is MenuError) {
+            return Center(child: Text(menuState.message));
           }
           return const Center(child: Text('Something went wrong.'));
         },

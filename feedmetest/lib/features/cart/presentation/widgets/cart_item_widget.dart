@@ -43,20 +43,20 @@ class CartItemWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.remove_circle_outline),
                   onPressed: () {
-                    context.read<CartCubit>().decrementQuantity(cartItem);
+                    context.read<CartCubit>().decrementQuantity(cartItem.menuItem);
                   },
                 ),
                 Text('${cartItem.quantity}'),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline),
                   onPressed: () {
-                    context.read<CartCubit>().incrementQuantity(cartItem);
+                    context.read<CartCubit>().incrementQuantity(cartItem.menuItem);
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () {
-                    context.read<CartCubit>().removeFromCart(cartItem);
+                    context.read<CartCubit>().removeFromCart(cartItem.menuItem);
                   },
                 ),
               ],
