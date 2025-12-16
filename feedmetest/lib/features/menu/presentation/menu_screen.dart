@@ -1,3 +1,4 @@
+import 'package:feedmetest/features/bot/presentation/bot_screen.dart';
 import 'package:feedmetest/features/cart/controller/cart_cubit.dart';
 import 'package:feedmetest/features/cart/controller/cart_state.dart';
 import 'package:feedmetest/features/kitchen/controller/kitchen_cubit.dart';
@@ -66,6 +67,16 @@ class _MenuViewState extends State<MenuView> {
               });
             },
           ),
+          Visibility(
+            visible: _isManager,
+            child: IconButton(
+              icon: const Icon(Icons.smart_toy),
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => const BotScreen()));
+              },
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.kitchen),
             onPressed: () {
@@ -90,11 +101,11 @@ class _MenuViewState extends State<MenuView> {
                     padding: const EdgeInsets.all(8.0),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8.0,
-                          mainAxisSpacing: 8.0,
-                          childAspectRatio: 0.8,
-                        ),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      childAspectRatio: 0.8,
+                    ),
                     itemCount: menuState.menuItems.length,
                     itemBuilder: (context, index) {
                       final item = menuState.menuItems[index];
@@ -152,3 +163,4 @@ class _MenuViewState extends State<MenuView> {
     );
   }
 }
+
