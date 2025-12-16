@@ -1,3 +1,4 @@
+import 'package:feedmetest/features/cart/presentation/widgets/order_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feedmetest/features/user/controller/user_cubit.dart';
@@ -12,6 +13,15 @@ class VipMemberDialog extends StatefulWidget {
 
 class _VipMemberDialogState extends State<VipMemberDialog> {
   final _controller = TextEditingController();
+
+  void _showConfirmationDialog() {
+    Navigator.of(context).pop(); // Dismiss the VipMemberDialog
+    showDialog(
+      context: context,
+      builder: (_) => const OrderConfirmationDialog(),
+      barrierDismissible: false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +42,7 @@ class _VipMemberDialogState extends State<VipMemberDialog> {
             // Skip logic
             context.read<UserCubit>().setVip(false);
             context.read<CartCubit>().clearCart();
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            _showConfirmationDialog();
           },
           child: const Text('Skip'),
         ),
@@ -42,7 +52,7 @@ class _VipMemberDialogState extends State<VipMemberDialog> {
             if (_controller.text.length == 5) {
               context.read<UserCubit>().setVip(true);
               context.read<CartCubit>().clearCart();
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              _showConfirmationDialog();
             } else {
               // Show an error or something
               ScaffoldMessenger.of(context).showSnackBar(
