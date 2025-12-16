@@ -23,8 +23,16 @@ class MenuScreen extends StatelessWidget {
   }
 }
 
-class MenuView extends StatelessWidget {
+class MenuView extends StatefulWidget {
   const MenuView({super.key});
+
+  @override
+  State<MenuView> createState() => _MenuViewState();
+}
+
+class _MenuViewState extends State<MenuView> {
+  int _clickCount = 0;
+  bool _isManager = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +40,32 @@ class MenuView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Menu'),
         actions: [
+          IconButton(
+            icon: Icon(
+              _isManager
+                  ? Icons.admin_panel_settings
+                  : Icons.admin_panel_settings_outlined,
+            ),
+            color: _isManager ? Colors.yellow : Colors.blueGrey,
+            onPressed: () {
+              setState(() {
+                _clickCount++;
+                if (_clickCount == 5) {
+                  _isManager = !_isManager;
+                  _clickCount = 0;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        _isManager
+                            ? 'You are now a Manager'
+                            : 'You are no longer a Manager',
+                      ),
+                    ),
+                  );
+                }
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.kitchen),
             onPressed: () {
@@ -113,7 +147,7 @@ class MenuView extends StatelessWidget {
             }
             return const SizedBox.shrink();
           },
-        )
+        ),
       ],
     );
   }
