@@ -11,9 +11,18 @@ class KitchenCubit extends Cubit<KitchenState> {
   late final StreamSubscription _botSubscription;
   final Map<String, Timer> _orderTimers = {};
 
-  KitchenCubit(this._botCubit) : super(const KitchenInitial()) {
-    _botSubscription = _botCubit.stream.listen((_) {
-      _processNextOrder();
+  int _previousBotCount;
+
+  KitchenCubit(this._botCubit)
+      : _previousBotCount = _botCubit.state.numberOfBots,
+        super(const KitchenInitial()) {
+    _botSubscription = _botCubit.stream.listen((botState) {
+      if (botState.numberOfBots < _previousBotCount) {
+        _handleBotReduction(botState.numberOfBots);
+      } else {
+        _processNextOrder();
+      }
+      _previousBotCount = botState.numberOfBots;
     });
   }
 
@@ -43,6 +52,39 @@ class KitchenCubit extends Cubit<KitchenState> {
     _processNextOrder();
   }
 
+  void _handleBotReduction(int newBotCount) {
+    final processingOrders = _orders
+        .where((order) => order.status == OrderStatus.processing)
+        .toList();
+    final difference = processingOrders.length - newBotCount;
+
+    if (difference > 0) {
+      processingOrders.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      final ordersToRevert = processingOrders.take(difference);
+
+      for (final order in ordersToRevert) {
+        final orderIndex = _orders.indexWhere((o) => o.id == order.id);
+        if (orderIndex != -1) {
+          _orders[orderIndex] =
+              _orders[orderIndex].copyWith(status: OrderStatus.pending);
+          _orderTimers.remove(order.id)?.cancel();
+        }
+      }
+
+      _orders.sort((a, b) {
+        if (a.isVip && !b.isVip) {
+          return -1;
+        }
+        if (!a.isVip && b.isVip) {
+          return 1;
+        }
+        return a.timestamp.compareTo(b.timestamp);
+      });
+
+      emit(KitchenOrdersUpdated(List.from(_orders)));
+    }
+  }
+
   void _processNextOrder() {
     while (true) {
       final processingCount = _orders
@@ -69,7 +111,7 @@ class KitchenCubit extends Cubit<KitchenState> {
   }
 
   void _startOrderTimer(String orderId) {
-    _orderTimers[orderId] = Timer(const Duration(seconds: 10), () {
+    _orderTimers[orderId] = Timer(const Duration(seconds: 30), () {
       completeOrder(orderId);
     });
   }

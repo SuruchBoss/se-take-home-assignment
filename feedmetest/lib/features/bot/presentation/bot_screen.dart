@@ -11,10 +11,7 @@ class BotScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Bot Management'),
       ),
-      body: BlocProvider(
-        create: (context) => BotCubit(),
-        child: const BotView(),
-      ),
+      body: const BotView(),
     );
   }
 }
@@ -27,50 +24,41 @@ class BotView extends StatefulWidget {
 }
 
 class _BotViewState extends State<BotView> {
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.text = context.read<BotCubit>().state.numberOfBots.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Number of Bots',
-            ),
+    return BlocBuilder<BotCubit, BotState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: () {
+                  if (state.numberOfBots > 1) {
+                    context
+                        .read<BotCubit>()
+                        .setNumberOfBots(state.numberOfBots - 1);
+                  }
+                },
+              ),
+              Text(
+                '${state.numberOfBots}',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  context
+                      .read<BotCubit>()
+                      .setNumberOfBots(state.numberOfBots + 1);
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              final newCount = int.tryParse(_controller.text);
-              if (newCount != null) {
-                context.read<BotCubit>().setNumberOfBots(newCount);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Number of bots updated.'),
-                  ),
-                );
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+        );
+      },
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

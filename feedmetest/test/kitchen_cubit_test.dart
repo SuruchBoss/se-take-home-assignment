@@ -31,5 +31,30 @@ void main() {
           state.orders.where((o) => o.status == OrderStatus.processing).toList();
       expect(processingOrders.length, 2);
     });
+
+    test('handles bot reduction correctly', () async {
+      botCubit.setNumberOfBots(2);
+      kitchenCubit.addOrder([], false);
+      kitchenCubit.addOrder([], false);
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      var state = kitchenCubit.state as KitchenOrdersUpdated;
+      var processingOrders =
+          state.orders.where((o) => o.status == OrderStatus.processing).toList();
+      expect(processingOrders.length, 2);
+
+      botCubit.setNumberOfBots(1);
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      state = kitchenCubit.state as KitchenOrdersUpdated;
+      processingOrders =
+          state.orders.where((o) => o.status == OrderStatus.processing).toList();
+      final pendingOrders =
+          state.orders.where((o) => o.status == OrderStatus.pending).toList();
+
+      expect(processingOrders.length, 1);
+      expect(pendingOrders.length, 1);
+    });
   });
 }
