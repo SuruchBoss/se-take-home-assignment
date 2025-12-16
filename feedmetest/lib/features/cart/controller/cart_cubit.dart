@@ -64,4 +64,8 @@ class CartCubit extends Cubit<CartState> {
       }
     }
   }
+
+  void clearCart() {
+    emit(const CartLoaded([]));
+  }
 }
