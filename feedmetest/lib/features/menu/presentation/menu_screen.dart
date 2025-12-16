@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../controller/menu_cubit.dart';
 import '../controller/menu_state.dart';
-import '../model/menu_item.dart';
 import 'widgets/queue_banner.dart';
 import 'widgets/menu_item_card.dart';
 import 'widgets/cart_icon_badge.dart';
@@ -27,9 +26,7 @@ class MenuView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Menu'),
-        actions: [
-          const CartIconBadge(),
-        ],
+        actions: [const CartIconBadge()],
       ),
       body: BlocBuilder<MenuCubit, MenuState>(
         builder: (context, state) {
@@ -74,7 +71,3 @@ class MenuView extends StatelessWidget {
     );
   }
 }
-
-
-
-

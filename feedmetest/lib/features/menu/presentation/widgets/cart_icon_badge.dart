@@ -1,5 +1,6 @@
-import 'package:feedmetest/features/menu/controller/menu_cubit.dart';
-import 'package:feedmetest/features/menu/controller/menu_state.dart';
+import 'package:feedmetest/features/cart/controller/cart_cubit.dart';
+import 'package:feedmetest/features/cart/controller/cart_state.dart';
+import 'package:feedmetest/features/cart/presentation/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,7 +9,7 @@ class CartIconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MenuCubit, MenuState>(
+    return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
         return Padding(
           padding: const EdgeInsets.only(right: 16.0),
@@ -18,10 +19,14 @@ class CartIconBadge extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.shopping_cart),
                 onPressed: () {
-                  // TODO: Navigate to cart screen
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CartScreen(),
+                    ),
+                  );
                 },
               ),
-              if (state is MenuLoaded && state.cartItems.isNotEmpty)
+              if (state is CartLoaded && state.cartItems.isNotEmpty)
                 Positioned(
                   right: 8,
                   top: 8,

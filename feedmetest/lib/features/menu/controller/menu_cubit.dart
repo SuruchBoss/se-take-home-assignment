@@ -36,21 +36,9 @@ class MenuCubit extends Cubit<MenuState> {
     ),
   ];
 
-  final List<MenuItem> _cartItems = [];
-
   void getMenuItems() {
     emit(MenuLoading());
     // In a real app, you would fetch this from an API
-    emit(MenuLoaded(List.from(_menuItems), List.from(_cartItems), 123, 120));
-  }
-
-  void addToCart(MenuItem item) {
-    if (state is MenuLoaded) {
-      final currentState = state as MenuLoaded;
-      _cartItems.add(item);
-      emit(
-        MenuLoaded(List.from(currentState.menuItems), List.from(_cartItems), currentState.userQueue, currentState.currentQueue),
-      );
-    }
+    emit(MenuLoaded(List.from(_menuItems), 123, 120));
   }
 }

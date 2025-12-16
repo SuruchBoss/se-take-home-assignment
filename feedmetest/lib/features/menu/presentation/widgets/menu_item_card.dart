@@ -1,4 +1,4 @@
-import 'package:feedmetest/features/menu/controller/menu_cubit.dart';
+import 'package:feedmetest/features/cart/controller/cart_cubit.dart';
 import 'package:feedmetest/features/menu/model/menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,7 +15,12 @@ class MenuItemCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: Image.network(item.imageUrl, fit: BoxFit.cover)),
+          Expanded(
+            child: Image.network(
+              item.imageUrl,
+              fit: BoxFit.cover,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -34,7 +39,7 @@ class MenuItemCard extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                context.read<MenuCubit>().addToCart(item);
+                context.read<CartCubit>().addToCart(item);
               },
               child: const Text('Add to Cart'),
             ),

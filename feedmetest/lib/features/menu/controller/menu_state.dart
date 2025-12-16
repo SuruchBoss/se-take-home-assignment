@@ -14,14 +14,13 @@ class MenuLoading extends MenuState {}
 
 class MenuLoaded extends MenuState {
   final List<MenuItem> menuItems;
-  final List<MenuItem> cartItems;
   final int userQueue;
   final int currentQueue;
 
-  const MenuLoaded(this.menuItems, this.cartItems, this.userQueue, this.currentQueue);
+  const MenuLoaded(this.menuItems, this.userQueue, this.currentQueue);
 
   @override
-  List<Object> get props => [menuItems, cartItems, userQueue, currentQueue];
+  List<Object> get props => [menuItems, userQueue, currentQueue];
 }
 
 class MenuError extends MenuState {
