@@ -3,6 +3,7 @@ import 'package:feedmetest/features/kitchen/controller/kitchen_cubit.dart';
 import 'package:feedmetest/features/kitchen/controller/kitchen_state.dart';
 import 'package:feedmetest/features/kitchen/model/order.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bloc_test/bloc_test.dart';
 
 void main() {
   group('KitchenCubit', () {
@@ -18,43 +19,107 @@ void main() {
       expect(kitchenCubit.state, isA<KitchenInitial>());
     });
 
-    test('processes orders automatically based on number of bots', () async {
-      botCubit.setNumberOfBots(2);
-      kitchenCubit.addOrder([], false);
-      kitchenCubit.addOrder([], false);
-      kitchenCubit.addOrder([], false);
+    blocTest<KitchenCubit, KitchenState>(
+      'adds a new order and sorts it',
+      build: () => kitchenCubit,
+      act: (cubit) {
+        cubit.addOrder([], false);
+        cubit.addOrder([], true);
+      },
+      verify: (cubit) {
+        final state = cubit.state as KitchenOrdersUpdated;
+        expect(state.orders.length, 2);
+        expect(state.orders.first.isVip, true);
+      },
+    );
 
-      await Future.delayed(const Duration(milliseconds: 100));
+    blocTest<KitchenCubit, KitchenState>(
+      'processes orders based on number of bots',
+      build: () {
+        botCubit.setNumberOfBots(2);
+        return kitchenCubit;
+      },
+      act: (cubit) {
+        cubit.addOrder([], false);
+        cubit.addOrder([], false);
+        cubit.addOrder([], false);
+      },
+      wait: const Duration(milliseconds: 100),
+      verify: (cubit) {
+        final state = cubit.state as KitchenOrdersUpdated;
+        final processingOrders =
+            state.orders.where((o) => o.status == OrderStatus.processing).toList();
+        expect(processingOrders.length, 2);
+      },
+    );
 
-      final state = kitchenCubit.state as KitchenOrdersUpdated;
-      final processingOrders =
-          state.orders.where((o) => o.status == OrderStatus.processing).toList();
-      expect(processingOrders.length, 2);
-    });
+    blocTest<KitchenCubit, KitchenState>(
+      'completes an order and processes the next one',
+      build: () {
+        botCubit.setNumberOfBots(1);
+        return kitchenCubit;
+      },
+      act: (cubit) async {
+        cubit.addOrder([], false);
+        await Future.delayed(const Duration(milliseconds: 100));
+        // Manually complete the order as timer is mocked in test
+        final orderId = (cubit.state as KitchenOrdersUpdated)
+            .orders
+            .firstWhere((o) => o.status == OrderStatus.processing)
+            .id;
+        cubit.completeOrder(orderId);
+      },
+      verify: (cubit) {
+        final state = cubit.state as KitchenOrdersUpdated;
+        final completedOrders =
+            state.orders.where((o) => o.status == OrderStatus.completed).toList();
+        expect(completedOrders.length, 1);
+      },
+    );
 
-    test('handles bot reduction correctly', () async {
-      botCubit.setNumberOfBots(2);
-      kitchenCubit.addOrder([], false);
-      kitchenCubit.addOrder([], false);
+    blocTest<KitchenCubit, KitchenState>(
+      'increases bots and processes more orders',
+      build: () {
+        botCubit.setNumberOfBots(1);
+        return kitchenCubit;
+      },
+      act: (cubit) async {
+        cubit.addOrder([], false);
+        cubit.addOrder([], false);
+        await Future.delayed(const Duration(milliseconds: 100));
+        botCubit.setNumberOfBots(2);
+      },
+      wait: const Duration(milliseconds: 100),
+      verify: (cubit) {
+        final state = cubit.state as KitchenOrdersUpdated;
+        final processingOrders =
+            state.orders.where((o) => o.status == OrderStatus.processing).toList();
+        expect(processingOrders.length, 2);
+      },
+    );
 
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      var state = kitchenCubit.state as KitchenOrdersUpdated;
-      var processingOrders =
-          state.orders.where((o) => o.status == OrderStatus.processing).toList();
-      expect(processingOrders.length, 2);
-
-      botCubit.setNumberOfBots(1);
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      state = kitchenCubit.state as KitchenOrdersUpdated;
-      processingOrders =
-          state.orders.where((o) => o.status == OrderStatus.processing).toList();
-      final pendingOrders =
-          state.orders.where((o) => o.status == OrderStatus.pending).toList();
-
-      expect(processingOrders.length, 1);
-      expect(pendingOrders.length, 1);
-    });
+    blocTest<KitchenCubit, KitchenState>(
+      'decreases bots and stops processing newest order',
+      build: () {
+        botCubit.setNumberOfBots(2);
+        return kitchenCubit;
+      },
+      act: (cubit) async {
+        cubit.addOrder([], false);
+        cubit.addOrder([], false);
+        await Future.delayed(const Duration(milliseconds: 100));
+        botCubit.setNumberOfBots(1);
+      },
+      wait: const Duration(milliseconds: 100),
+      verify: (cubit) {
+        final state = cubit.state as KitchenOrdersUpdated;
+        final processingOrders =
+            state.orders.where((o) => o.status == OrderStatus.processing).toList();
+        final pendingOrders =
+            state.orders.where((o) => o.status == OrderStatus.pending).toList();
+        expect(processingOrders.length, 1);
+        expect(pendingOrders.length, 1);
+      },
+    );
   });
 }
