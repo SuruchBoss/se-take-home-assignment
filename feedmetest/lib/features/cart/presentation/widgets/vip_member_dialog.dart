@@ -1,4 +1,6 @@
+import 'package:feedmetest/features/cart/controller/cart_state.dart';
 import 'package:feedmetest/features/cart/presentation/widgets/order_confirmation_dialog.dart';
+import 'package:feedmetest/features/kitchen/controller/kitchen_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feedmetest/features/user/controller/user_cubit.dart';
@@ -23,6 +25,13 @@ class _VipMemberDialogState extends State<VipMemberDialog> {
     );
   }
 
+  void _addOrderToKitchen(bool isVip) {
+    final cartState = context.read<CartCubit>().state;
+    if (cartState is CartLoaded) {
+      context.read<KitchenCubit>().addOrder(cartState.cartItems, isVip);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -41,6 +50,7 @@ class _VipMemberDialogState extends State<VipMemberDialog> {
           onPressed: () {
             // Skip logic
             context.read<UserCubit>().setVip(false);
+            _addOrderToKitchen(false);
             context.read<CartCubit>().clearCart();
             _showConfirmationDialog();
           },
@@ -51,6 +61,7 @@ class _VipMemberDialogState extends State<VipMemberDialog> {
             // Confirm logic
             if (_controller.text.length == 5) {
               context.read<UserCubit>().setVip(true);
+              _addOrderToKitchen(true);
               context.read<CartCubit>().clearCart();
               _showConfirmationDialog();
             } else {

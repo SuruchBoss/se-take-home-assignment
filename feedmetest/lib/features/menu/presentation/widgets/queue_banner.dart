@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class QueueBanner extends StatelessWidget {
-  const QueueBanner({super.key, required this.userQueue, required this.currentQueue});
+  const QueueBanner({
+    super.key,
+    required this.userQueue,
+    required this.currentQueue,
+  });
 
   final int userQueue;
   final int currentQueue;
@@ -11,9 +15,7 @@ class QueueBanner extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: TextButton(
-        onPressed: () {
-          // TODO: Implement queue details view
-        },
+        onPressed: () {},
         style: TextButton.styleFrom(
           backgroundColor: Theme.of(context).primaryColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -25,7 +27,11 @@ class QueueBanner extends StatelessWidget {
             children: [
               Text(
                 'Your Queue: Q$userQueue',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               Text(
                 'Current: Q$currentQueue',
