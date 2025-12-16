@@ -44,20 +44,26 @@ class KitchenCubit extends Cubit<KitchenState> {
   }
 
   void _processNextOrder() {
-    final processingCount = _orders
-        .where((order) => order.status == OrderStatus.processing)
-        .length;
-    final availableBots = _botCubit.state.numberOfBots;
+    while (true) {
+      final processingCount = _orders
+          .where((order) => order.status == OrderStatus.processing)
+          .length;
+      final availableBots = _botCubit.state.numberOfBots;
 
-    if (processingCount < availableBots) {
-      final pendingOrderIndex =
-          _orders.indexWhere((order) => order.status == OrderStatus.pending);
-      if (pendingOrderIndex != -1) {
-        final order = _orders[pendingOrderIndex];
-        _orders[pendingOrderIndex] =
-            order.copyWith(status: OrderStatus.processing);
-        _startOrderTimer(order.id);
-        emit(KitchenOrdersUpdated(List.from(_orders)));
+      if (processingCount < availableBots) {
+        final pendingOrderIndex =
+            _orders.indexWhere((order) => order.status == OrderStatus.pending);
+        if (pendingOrderIndex != -1) {
+          final order = _orders[pendingOrderIndex];
+          _orders[pendingOrderIndex] =
+              order.copyWith(status: OrderStatus.processing);
+          _startOrderTimer(order.id);
+          emit(KitchenOrdersUpdated(List.from(_orders)));
+        } else {
+          break;
+        }
+      } else {
+        break;
       }
     }
   }
